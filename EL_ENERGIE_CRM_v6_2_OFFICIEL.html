@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EL-ÉNERGIE CRM v6.2 - Partagé Edwige & Florence</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #0F4761 0%, #1a5a7a 100%);
+            color: white;
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .header h1 { font-size: 1.8em; margin-bottom: 5px; }
+        .header .subtitle { font-size: 0.9em; opacity: 0.95; }
+        .version-badge {
+            background: #F37322;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .mode-banner {
+            padding: 12px 25px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .mode-banner.shared {
+            background: #d4edda;
+            color: #155724;
+            border-bottom: 2px solid #28a745;
+        }
+        .mode-banner.local {
+            background: #fff3cd;
+            color: #856404;
+            border-bottom: 2px solid #ffc107;
+        }
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 220px;
+            background: white;
+            border-right: 1px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+        .sidebar-title {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #0F4761;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+        .nav-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 6px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.95em;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover {
+            background: #FEF0E7;
+            border-color: #F37322;
+        }
+        .nav-btn.active {
+            background: #F37322;
+            color: white;
+            border-color: #F37322;
+        }
+        .main {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+        .view { display: none; }
+        .view.active { display: block; }
+        h2 {
+            color: #0F4761;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        th {
+            background: #0F4761;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover { background: #f9f9f9; }
+        .btn {
+            background: #F37322;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #d65a1a; }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+        }
+        .status-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status-prospect { background: #e7f3ff; color: #0051ba; }
+        .status-encours { background: #fff3cd; color: #856404; }
+        .status-facture { background: #d4edda; color: #155724; }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .badge-edwige { background: #FEF0E7; color: #F37322; }
+        .badge-florence { background: #d4edda; color: #155724; }
+        .btn-group { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>EL-ÉNERGIE CRM</h1>
+            <p class="subtitle">Gestion clients centralisée</p>
+        </div>
+        <div class="version-badge">v6.2 • PARTAGÉ</div>
+    </div>
+
+    <div id="modeBanner" class="mode-banner local">
+        <div>
+            <span id="modeText">MODE LOCAL</span> — <span id="userText">Edwige</span>
+        </div>
+        <div>
+            <button class="btn btn-small" onclick="switchUser()">Changer utilisateur</button>
+            <button class="btn btn-small" onclick="exportJSON()">Exporter JSON</button>
+            <button class="btn btn-small" onclick="importJSON()">Importer JSON</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Mes Clients</div>
+                <button class="nav-btn active" onclick="switchView('dashboard')">📊 Tableau Bord</button>
+                <button class="nav-btn" onclick="switchView('bilans')">📋 Bilans</button>
+                <button class="nav-btn" onclick="switchView('formations')">🎓 Formations</button>
+                <button class="nav-btn" onclick="switchView('seminaires')">🎯 Séminaires</button>
+                <button class="nav-btn" onclick="switchView('animations')">🎭 Animations</button>
+            </div>
+        </div>
+
+        <div class="main">
+            <div id="dashboard" class="view active">
+                <h2>Tableau Bord</h2>
+                <div id="dashboardContent">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div style="background: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #F37322;">
+                            <div style="color: #0F4761; font-size: 0.85em; text-transform: uppercase; margin-bottom: 10px;">CA Total</div>
+                            <div style="font-size: 1.8em; color: #F37322; font-weight: bold;" id="totalCA">0 €</div>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #F37322;">
+                            <div style="color: #0F4761; font-size: 0.85em; text-transform: uppercase; margin-bottom: 10px;">Bilans</div>
+                            <div style="font-size: 1.8em; color: #F37322; font-weight: bold;" id="totalBilans">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bilans" class="view">
+                <h2>Bilans de Compétences</h2>
+                <button class="btn" onclick="addBilan()">+ Nouveau Bilan</button>
+                <div id="bilansContent">
+                    <div class="empty-state">Aucun bilan</div>
+                </div>
+            </div>
+
+            <div id="formations" class="view">
+                <h2>Formations</h2>
+                <button class="btn" onclick="addFormation()">+ Nouvelle Formation</button>
+                <div id="formationsContent">
+                    <div class="empty-state">Aucune formation</div>
+                </div>
+            </div>
+
+            <div id="seminaires" class="view">
+                <h2>Séminaires</h2>
+                <button class="btn" onclick="addSeminaire()">+ Nouveau Séminaire</button>
+                <div id="seminairesContent">
+                    <div class="empty-state">Aucun séminaire</div>
+                </div>
+            </div>
+
+            <div id="animations" class="view">
+                <h2>Animations</h2>
+                <button class="btn" onclick="addAnimation()">+ Nouvelle Animation</button>
+                <div id="animationsContent">
+                    <div class="empty-state">Aucune animation</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = localStorage.getItem('crm-user') || 'Edwige';
+        let data = JSON.parse(localStorage.getItem('crm-data')) || {
+            bilans: [],
+            formations: [],
+            seminaires: [],
+            animations: []
+        };
+
+        function init() {
+            updateModeDisplay();
+            renderDashboard();
+            renderAllTables();
+        }
+
+        function updateModeDisplay() {
+            document.getElementById('userText').textContent = currentUser;
+            document.getElementById('modeText').textContent = 'MODE LOCAL (Edwige)';
+            document.getElementById('modeBanner').className = 'mode-banner local';
+        }
+
+        function switchUser() {
+            currentUser = currentUser === 'Edwige' ? 'Florence' : 'Edwige';
+            localStorage.setItem('crm-user', currentUser);
+            updateModeDisplay();
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(viewName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function renderDashboard() {
+            const totalCA = data.bilans.reduce((s, b) => s + (b.montantTTC || 0), 0) +
+                           data.formations.reduce((s, f) => s + (f.montantTTC || 0), 0);
+            document.getElementById('totalCA').textContent = totalCA.toLocaleString('fr-FR') + ' €';
+            document.getElementById('totalBilans').textContent = data.bilans.length;
+        }
+
+        function renderAllTables() {
+            renderTable('bilans');
+            renderTable('formations');
+            renderTable('seminaires');
+            renderTable('animations');
+        }
+
+        function renderTable(type) {
+            const records = data[type] || [];
+            const container = document.getElementById(type + 'Content');
+            
+            if (!records.length) {
+                container.innerHTML = '<div class="empty-state">Aucune donnée</div>';
+                return;
+            }
+
+            let html = '<table><tr><th>Nom</th><th>Type</th><th>Montant</th><th>Statut</th><th>Responsable</th></tr>';
+            records.forEach((r, i) => {
+                const badge = r.responsable === 'Florence' ? 'badge-florence' : 'badge-edwige';
+                html += `<tr>
+                    <td>${r.nom || r.clientName || ''}</td>
+                    <td>${r.type || r.prestationType || ''}</td>
+                    <td>${(r.montantTTC || 0).toLocaleString('fr-FR')} €</td>
+                    <td><span class="status-tag status-${(r.statut || 'prospect').toLowerCase()}">${r.statut || 'Prospect'}</span></td>
+                    <td><span class="badge ${badge}">${r.responsable || 'Edwige'}</span></td>
+                </tr>`;
+            });
+            html += '</table>';
+            container.innerHTML = html;
+        }
+
+        function addBilan() {
+            const nom = prompt('Nom du client:');
+            if (!nom) return;
+            data.bilans.push({
+                nom: nom,
+                montantTTC: 2600,
+                statut: 'Prospect',
+                responsable: currentUser,
+                date: new Date().toLocaleDateString('fr-FR')
+            });
+            saveData();
+            renderAllTables();
+            renderDashboard();
+        }
+
+        function addFormation() {
+            const nom = prompt('Nom formation:');
+            if (!nom) return;
+            data.formations.push({
+                nom: nom,
+                montantTTC: 1500,
+                statut: 'Prospect',
+                responsable: currentUser,
+                date: new Date().toLocaleDateString('fr-FR')
+            });
+            saveData();
+            renderAllTables();
+            renderDashboard();
+        }
+
+        function addSeminaire() {
+            const nom = prompt('Nom séminaire:');
+            if (!nom) return;
+            data.seminaires.push({
+                nom: nom,
+                montantTTC: 0,
+                statut: 'Prospect',
+                responsable: currentUser
+            });
+            saveData();
+            renderAllTables();
+        }
+
+        function addAnimation() {
+            const nom = prompt('Nom animation:');
+            if (!nom) return;
+            data.animations.push({
+                nom: nom,
+                montantTTC: 0,
+                statut: 'Prospect',
+                responsable: currentUser
+            });
+            saveData();
+            renderAllTables();
+        }
+
+        function saveData() {
+            localStorage.setItem('crm-data', JSON.stringify(data));
+        }
+
+        function exportJSON() {
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'crm-export-' + new Date().toISOString().slice(0,10) + '.json';
+            a.click();
+        }
+
+        function importJSON() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = event => {
+                    try {
+                        data = JSON.parse(event.target.result);
+                        saveData();
+                        renderAllTables();
+                        renderDashboard();
+                        alert('Données importées!');
+                    } catch (err) {
+                        alert('Erreur: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        init();
+    </script>
+</body>
+</html>
