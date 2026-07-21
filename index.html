@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EL-ÉNERGIE CRM v7.0</title>
+    <style>
+        /* Styles CSS existants de la v6.2 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7fa; color: #1a1a1a; }
+        /* ... */
+    </style>
+</head>
+<body>
+    <!-- ÉCRAN DE CONNEXION -->
+    <div id="loginOverlay" class="login-overlay">
+        <!-- ... -->
+    </div>
+
+    <!-- CHARGEMENT -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <!-- ... -->
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">EL-ÉNERGIE<small>CRM v7.0</small></div>
+
+            <div class="user-chip" id="userChip" style="display:none;">
+                <!-- ... -->
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Gestion</div>
+                <button class="nav-btn active" data-view="view-entreprises" onclick="switchView('view-entreprises', this)">Entreprises</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Prestations</div>
+                <button class="nav-btn" data-view="view-formations" onclick="switchView('view-formations', this)">Formations</button>
+                <button class="nav-btn" data-view="view-bilans" onclick="switchView('view-bilans', this)">Bilans</button>
+                <button class="nav-btn" data-view="view-seminaires" onclick="switchView('view-seminaires', this)">Séminaires</button>
+                <button class="nav-btn" data-view="view-animations" onclick="switchView('view-animations', this)">Animations</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Suivi</div>
+                <button class="nav-btn" data-view="view-workflow" onclick="switchView('view-workflow', this)">Suivi Docs</button>
+                <button class="nav-btn" data-view="view-dashboard" onclick="switchView('view-dashboard', this)">Dashboard</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Responsable</div>
+                <button class="resp-filter-btn active" data-resp="Toutes" onclick="setRespFilter('Toutes', this)">Toutes</button>
+                <button class="resp-filter-btn" data-resp="Edwige" onclick="setRespFilter('Edwige', this)">Edwige</button>
+                <button class="resp-filter-btn" data-resp="Florence" onclick="setRespFilter('Florence', this)">Florence</button>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="header">
+                <h1 id="pageTitle">Entreprises</h1>
+                <span id="saveStatus" style="font-size:12px;color:#999;font-weight:600;"></span>
+                <div class="header-actions">
+                    <!-- ... -->
+                </div>
+            </div>
+
+            <div id="modeBanner" style="padding:8px 30px;font-size:12px;font-weight:700;letter-spacing:0.3px;"></div>
+
+            <div class="content">
+                <!-- ENTREPRISES -->  
+                <div id="view-entreprises" class="view active">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr>
+                                <th>Entreprise</th><th>SIRET</th><th>Adresse</th><th>OPCO</th>
+                                <th>Contact</th><th>Email</th><th>Téléphone</th><th>Status</th><th>Créé par</th>
+                                <th style="width: 80px;">Actions</th>
+                            </tr></thead>
+                            <tbody id="entreprisesTable"></tbody>
+                        </table>  
+                    </div>
+                </div>
+
+                <!-- FORMATIONS -->
+                <div id="view-formations" class="view">
+                    <!-- ... -->
+                </div>
+
+                <!-- BILANS -->
+                <div id="view-bilans" class="view">
+                    <!-- ... -->
+                </div>
+
+                <!-- SÉMINAIRES (nouveau) -->
+                <div id="view-seminaires" class="view">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr>
+                                <th>Entreprise</th><th>Type</th><th>Date Début</th><th>Date Fin</th>  
+                                <th>Participants</th><th>Montant HT</th><th>Responsable</th><th>Statut</th>
+                                <th style="width: 80px;">Actions</th>
+                            </tr></thead>
+                            <tbody id="seminairesTable"></tbody>
+                        </table>
+                    </div>  
+                </div>
+
+                <!-- ANIMATIONS (nouveau) -->
+                <div id="view-animations" class="view">
+                    <div class="table-wrapper">  
+                        <table>
+                            <thead><tr>
+                                <th>Entreprise</th><th>Type</th><th>Date</th>
+                                <th>Participants</th><th>Montant HT</th><th>Responsable</th><th>Statut</th>
+                                <th style="width: 80px;">Actions</th>
+                            </tr></thead>
+                            <tbody id="animationsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- WORKFLOW -->  
+                <div id="view-workflow" class="view">
+                    <!-- ... -->
+                </div>
+
+                <!-- DASHBOARD -->
+                <div id="view-dashboard" class="view">
+                    <!-- ... -->  
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALES -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Ajouter</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>  
+            </div>
+            <form id="addForm" onsubmit="saveItem(event)">
+                <div id="formFields"></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>  
+
+    <script>
+        // Configuration et données de départ (identiques à la v6.2)
+        const STORAGE_KEY = 'crm-el-energie-v7';  
+        const MODE_PARTAGE = (typeof window.storage !== 'undefined');
+        // ...
+
+        // Variables globales et utilitaires (identiques à la v6.2)  
+        let currentUser = null;
+        let currentAddType = 'entreprise';
+        // ...
+
+        // Store et données (structure v7, données v6)
+        const store = {
+            entreprises: [], formations: [], bilans: [],
+            seminaires: [],  // nouveau
+            animations: [],  // nouveau
+            docs: {},
+
+            async load() {
+                // ... Chargement des données entreprises, formations, bilans, docs
+                // Ajout : chargement des séminaires et animations
+                this.seminaires = (data.seminaires || []).map(s => ({ ...s, responsable: s.responsable || 'Edwige', status: migrateStatut(s.status) }));  
+                this.animations = (data.animations || []).map(a => ({ ...a, responsable: a.responsable || 'Edwige', status: migrateStatut(a.status) }));
+            },
+
+            async save(silent) {
+                // ... Sauvegarde des données entreprises, formations, bilans, docs  
+                // Ajout : sauvegarde des séminaires et animations
+                const payload = JSON.stringify({
+                    entreprises: this.entreprises,
+                    formations: this.formations,  
+                    bilans: this.bilans,
+                    seminaires: this.seminaires,
+                    animations: this.animations,
+                    docs: this.docs,
+                    lastSavedBy: currentUser || 'Système',
+                    lastSavedAt: new Date().toISOString()  
+                });
+                // ...
+            }
+        };
+
+        // Fonctions de rendu (mises à jour pour v7)
+        function entrepriseVisible(e) {
+            // ... Identique à v6.2
+        }
+
+        function renderEntreprises()
