@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>EL-ENERGIE CRM v6+v7</title>
+  <style>
+    /* Styles CSS v6 */
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header { background-color: #f2f2f2; padding: 20px; text-align: center; }
+    h1 { margin: 0; }
+    main { padding: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); }
+    .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
+    .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+    .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>EL-ENERGIE CRM</h1>
+  </header>
+  <main>
+    <div id="tabs">
+      <button id="entreprisesTab">Entreprises</button>
+      <button id="formationsTab">Formations</button>
+      <button id="bilansTab">Bilans</button>
+      <button id="seminairesTab">Séminaires</button>
+      <button id="animationsTab">Animations</button>
+    </div>
+    <div id="content">
+      <div id="entreprises">
+        <h2>Entreprises</h2>
+        <button id="ajouterEntrepriseBtn">Ajouter une entreprise</button>
+        <table id="entreprisesTable">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>SIRET</th>
+              <th>Adresse</th>
+              <th>OPCO</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="formations">
+        <h2>Formations</h2>
+        <table id="formationsTable">
+          <thead>
+            <tr>
+              <th>Entreprise</th>
+              <th>Type</th>
+              <th>Dates</th>
+              <th>Participants</th>
+              <th>Montant HT</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="bilans">
+        <h2>Bilans</h2>
+        <table id="bilansTable">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Type</th>
+              <th>Dates</th>
+              <th>Montant HT</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <!-- Séminaires et animations -->
+    </div>
+  </main>
+  <div id="entrepriseModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Ajouter/Modifier une entreprise</h2>
+      <form id="entrepriseForm">
+        <label for="nom">Nom:</label><br>
+        <input type="text" id="nom" name="nom"><br>
+        <label for="siret">SIRET:</label><br>
+        <input type="text" id="siret" name="siret"><br>
+        <label for="adresse">Adresse:</label><br>
+        <input type="text" id="adresse" name="adresse"><br>
+        <label for="opco">OPCO:</label><br>
+        <input type="text" id="opco" name="opco"><br>
+        <input type="submit" value="Enregistrer">
+      </form> 
+    </div>
+  </div>
+
+  <script>
+    // Données (à remplacer par les vraies données de la v6)
+    let entreprises = [
+      { id: 1, nom: 'Entreprise 1', siret: '11111111100000', adresse: 'Adresse 1', opco: 'OPCO 1' },
+      { id: 2, nom: 'Entreprise 2', siret: '22222222200000', adresse: 'Adresse 2', opco: 'OPCO 2' },
+    ];
+
+    let formations = [
+      { id: 1, entrepriseId: 1, type: 'Type 1', dateDebut: '2023-01-01', dateFin: '2023-01-31', participants: 10, montantHT: 1000 },
+      { id: 2, entrepriseId: 2, type: 'Type 2', dateDebut: '2023-02-01', dateFin: '2023-02-28', participants: 20, montantHT: 2000 },
+    ];
+
+    let bilans = [
+      { id: 1, nom: 'Nom 1', type: 'Type 1', dateDebut: '2023-03-01', dateFin: '2023-03-31', montantHT: 1500 },
+      { id: 2, nom: 'Nom 2', type: 'Type 2', dateDebut: '2023-04-01', dateFin: '2023-04-30', montantHT: 2500 },
+    ];
+
+    // Fonctions d'initialisation des tableaux
+    function initEntreprisesTable() {
+      const tbody = document.querySelector('#entreprisesTable tbody');
+      tbody.innerHTML = '';
+      entreprises.forEach(entreprise => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${entreprise.nom}</td>
+          <td>${entreprise.siret}</td>
+          <td>${entreprise.adresse}</td>
+          <td>${entreprise.opco}</td>
+          <td>
+            <button class="editEntrepriseBtn" data-id="${entreprise.id}">Modifier</button>
+            <button class="deleteEntrepriseBtn" data-id="${entreprise.id}">Supprimer</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function initFormationsTable() {
+      const tbody = document.querySelector('#formationsTable tbody');
+      tbody.innerHTML = '';
+      formations.forEach(formation => {
+        const entreprise = entreprises.find(e => e.id === formation.entrepriseId);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${entreprise.nom}</td>  
+          <td>${formation.type}</td>
+          <td>${formation.dateDebut} - ${formation.dateFin}</td>
+          <td>${formation.participants}</td>
+          <td>${formation.montantHT} €</td>
+          <td>
+            <button class="editFormationBtn" data-id="${formation.id}">Modifier</button>
+            <button class="deleteFormationBtn" data-id="${formation.id}">Supprimer</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function initBilansTable() {
+      const tbody = document.querySelector('#bilansTable tbody');
+      tbody.innerHTML = '';
+      bilans.forEach(bilan => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${bilan.nom}</td>
+          <td>${bilan.type}</td>
+          <td>${bilan.dateDebut} - ${bilan.dateFin}</td>
+          <td>${bilan.montantHT} €</td>
+          <td>
+            <button class="editBilanBtn" data-id="${bilan.id}">Modifier</button>
+            <button class="deleteBilanBtn" data-id="${bilan.id}">Supprimer</button>  
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Appel des fonctions d'initialisation au chargement
+    initEntreprisesTable();
+    initFormationsTable();  
+    initBilansTable();
+
+    // Gestion des onglets
+    const tabs = document.querySelectorAll('#tabs button');
+    const contentDivs = document.querySelectorAll('#content > div');
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        contentDivs.forEach(div => div.style.display = 'none');
+        contentDivs[index].style.display = 'block';
+      });
+    });
+
+    // Gestion de la modale d'ajout/édition d'entreprise
+    const ajouterEntrepriseBtn = document.getElementById('ajouterEntrepriseBtn');
+    const entrepriseModal = document.getElementById('entrepriseModal');
+    const closeBtn = document.getElementsByClassName('close')[0];
+    const entrepriseForm = document.getElementById('entrepriseForm');
+
+    ajouterEntrepriseBtn.onclick = function() {
+      entrepriseForm.reset();
+      entrepriseModal.style.display = 'block';
+    }
+
+    closeBtn.onclick = function() {
+      entrepriseModal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+      if (event.target == entrepriseModal) {
+        entrepriseModal.style.display = 'none';
+      }
+    }
+
+    // Soumission du formulaire d'entreprise
+    entrepriseForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const formData = new FormData(entrepriseForm);
+      const entreprise = {
+        id: entreprises.length > 0 ? entreprises[entreprises.length - 1].id + 1 : 1,
+        nom: formData.get('nom'),
+        siret: formData.get('siret'),
+        adresse: formData.get('adresse'),
+        opco: formData.get('opco'),
+      };
+      entreprises.push(entreprise);
+      initEntreprisesTable();
+      entrepriseModal.style.display = 'none';
+    });
+
+    // Autres interactions (modifier, supprimer) à implémenter
+  </script>
+</body>
+</html>
