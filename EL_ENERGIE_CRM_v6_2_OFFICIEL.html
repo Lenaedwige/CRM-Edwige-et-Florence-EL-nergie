@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EL-ÉNERGIE CRM v6.2</title>
+    <style>
+        /* Styles CSS existants */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7fa; color: #1a1a1a; }
+        /* ... */
+    </style>
+</head>
+<body>
+    <!-- ÉCRAN DE CONNEXION -->
+    <div id="loginOverlay" class="login-overlay">
+        <!-- ... -->
+    </div>
+
+    <!-- CHARGEMENT -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <!-- ... -->
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">EL-ÉNERGIE<small>CRM v6.2</small></div>
+
+            <div class="user-chip" id="userChip" style="display:none;">
+                <!-- ... -->
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Gestion</div>
+                <button class="nav-btn active" data-view="view-entreprises" onclick="switchView('view-entreprises', this)">Entreprises</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Prestations</div>
+                <button class="nav-btn" data-view="view-formations" onclick="switchView('view-formations', this)">Formations</button>
+                <button class="nav-btn" data-view="view-bilans" onclick="switchView('view-bilans', this)">Bilans de compétences</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Suivi</div>
+                <button class="nav-btn" data-view="view-workflow" onclick="switchView('view-workflow', this)">Suivi Docs</button>
+                <button class="nav-btn" data-view="view-dashboard" onclick="switchView('view-dashboard', this)">Dashboard</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Responsable</div>
+                <button class="resp-filter-btn active" data-resp="Toutes" onclick="setRespFilter('Toutes', this)">Toutes les deux</button>
+                <button class="resp-filter-btn" data-resp="Edwige" onclick="setRespFilter('Edwige', this)">Dossiers Edwige</button>
+                <button class="resp-filter-btn" data-resp="Florence" onclick="setRespFilter('Florence', this)">Dossiers Florence</button>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="header">
+                <h1 id="pageTitle">Entreprises</h1>
+                <span id="saveStatus" style="font-size:12px;color:#999;font-weight:600;"></span>
+                <div class="header-actions">
+                    <!-- ... -->  
+                </div>
+            </div>
+
+            <div id="modeBanner" style="padding:8px 30px;font-size:12px;font-weight:700;letter-spacing:0.3px;"></div>
+
+            <div class="content">
+                <!-- ENTREPRISES -->
+                <div id="view-entreprises" class="view active">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Entreprise</th>
+                                    <th>SIRET</th>
+                                    <th>Adresse</th>
+                                    <th>OPCO</th>
+                                    <th>Contact</th>  
+                                    <th>Email</th>
+                                    <th>Téléphone</th>
+                                    <th>Status</th>
+                                    <th>Créé par</th>
+                                    <th style="width: 80px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="entreprisesTable"></tbody>
+                        </table>
+                    </div>
+                    <div class="sync-note">Données partagées en ligne — Edwige et Florence voient la même base. Pense à Actualiser si vous travaillez en même temps.</div>
+                </div>
+
+                <!-- FORMATIONS -->
+                <div id="view-formations" class="view">
+                    <!-- ... -->  
+                </div>
+
+                <!-- BILANS -->
+                <div id="view-bilans" class="view">
+                    <!-- ... -->
+                </div>
+
+                <!-- WORKFLOW -->
+                <div id="view-workflow" class="view">
+                    <!-- ... -->
+                </div>
+
+                <!-- DASHBOARD -->
+                <div id="view-dashboard" class="view">
+                    <!-- ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Ajouter</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <form id="addForm" onsubmit="saveItem(event)">
+                <div id="formFields"></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>  
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Configuration et données de départ
+        const STORAGE_KEY = 'crm-el-energie-v6';
+        const MODE_PARTAGE = (typeof window.storage !== 'undefined');
+        // ...
+        
+        // Variables globales et utilitaires  
+        let currentUser = null;
+        let currentAddType = 'entreprise';
+        // ...
+        
+        const store = {
+            entreprises: [], formations: [], bilans: [], docs: {},
+            
+            async load() {
+                // ...
+            },
+
+            async save(silent) {
+                // ...  
+            }
+        };
+
+        // Fonctions de rendu
+        function entrepriseVisible(e) {
+            // ...
+        }
+
+        function renderEntreprises() {
+            const tbody = document.getElementById('entreprisesTable');
+            tbody.innerHTML = store.entreprises.filter(entrepriseVisible).map(e => `
+                <tr onclick="openEditModal('entreprise', ${e.id})" style="cursor:pointer;" title="Cliquer pour modifier">
+                    <td><strong>${e.nom}</strong><br>${respBadge(e.creePar || 'Edwige')}</td>  
+                    <td>${e.siret || '—'}</td>
+                    <td>${e.adresse || '—'}</td>
+                    <td>${e.opco || '—'}</td>
+                    <td>${e.contact || '—'}${e.contact2 ? '<br>' + e.contact2 : ''}</td>
+                    <td>${e.email || '—'}${e.email2 ? '<br>' + e.email2 : ''}</td>  
+                    <td>${e.telephone || '—'}${e.telephone2 ? '<br>' + e.telephone2 : ''}</td>
+                    <td><span class="badge badge-info">${e.status || 'Actif'}</span></td>
+                    <td>${e.creePar || 'Edwige'}</td>
+                    <td class="action-btns">
+                        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openEditModal('entreprise', ${e.id})">Modif</button>  
+                        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteItem(${e.id}, 'entreprise')">Suppr</button>
+                    </td>
+                </tr>
+            `).join('');
+            if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#999;padding:30px;">Aucune entreprise pour ce filtre — clique sur + Ajouter</td></tr>';
+        }
+
+        function renderFormations() {
+            // ...  
+        }
+
+        function renderBilans() {
+            // ...
+        }
+
+        function renderWorkflow() {
+            // ...
+        }
+
+        function renderDashboard() {
+            // ...
+        }
+
+        // Fonctions de formulaire
+        function openAddModal(type) {
+            // ...
+            if (type === 'entreprise') {
+                // ...  
+                const cp = currentUser || 'Edwige';
+                formFields.innerHTML = `
+                    <!-- ... -->
+                    <div class="form-group">
+                        <label>Créée par</label>
+                        <select name="creePar">
+                            <option value="Edwige" ${cp === 'Edwige' ? 'selected' : ''}>Edwige</option>
+                            <option value="Florence" ${cp === 'Florence' ? 'selected' : ''}>Florence</option>
+                        </select>
+                    </div>
+                    <!-- ... -->
+                `;
+            } else if (type === 'formation') {
+                // ...
+            } else if (type === 'bilan') {
+                // ...
+            }
+            // ...
+        }
+
+        function openEditModal(type, id) {
+            // ...
+        }
+
+        function closeModal() {
+            // ...  
+        }
+
+        async function saveItem(e, type, editId) {
+            // ...
+            if (editId) {
+                // ...
+            } else if (type === 'entreprise') {
+                item.id = Math.max(...store.entreprises.map(c => c.id), 0) + 1;
+                item.status = 'Actif';
+                item.creePar = formData.get('creePar') || 'Edwige';
+                store.entreprises.push(item);
+            } else if (type === 'formation') {
+                // ...
+            } else if (type === 'bilan') {
+                // ...
+            }
+            // ...
+        }
+
+        async function deleteItem(id, type) {
+            // ...
+        }
+
+        // Import / Export
+        function exportJSON() {
+            // ...
+        }
+
+        function importJSON(event) {
+            // ...
+        }
+
+        // Démarrage
+        (async function init() {
+            // ...
+            await store.load();  
+            renderAll();
+        })();
+    </script>
+</body>
+</html>
